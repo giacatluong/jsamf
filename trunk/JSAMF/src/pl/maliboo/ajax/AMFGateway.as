@@ -4,6 +4,7 @@ package pl.maliboo.ajax
 	
 	import flash.external.ExternalInterface;
 	import flash.net.NetConnection;
+	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 
 	public class AMFGateway
@@ -32,9 +33,9 @@ package pl.maliboo.ajax
 			return gateways[uri];
 		}
 		
-		public static function callAMF(uri:String, id:String, method:String, ...rest):void
+		public static function callAMF(uri:String, id:String, method:String, compress:Boolean, ...rest):void
 		{
-			getInstanceForUri(uri).call(id, method, rest);
+			getInstanceForUri(uri).call(id, method, compress, rest);
 		}
 		
 		public static function setMarshallExceptions(marshall:Boolean):void
@@ -51,15 +52,24 @@ package pl.maliboo.ajax
 		public function AMFGateway(uri:String)
 		{
 			this.uri = uri;
+			//TODO: should it be 1 object? Or one per call?
 			this.connection = new NetConnection();
 			this.connection.connect(uri);
 		}
 		
-		public function call(id:String, method:String, args:Array):void
+		public function call(id:String, method:String, compress:Boolean, args:Array):void
 		{
 			/*var connection:NetConnection = new NetConnection();
 			connection.connect(uri);*/
-			connection.call.apply(connection, [method, new AJAXResponder(id, this)].concat(args));
+			if (compress)
+			{
+				var ba:ByteArray = new ByteArray();
+				ba.writeObject(args);
+				ba.compress();
+				connection.call.apply(connection, [method, new AJAXResponder(id, this), ba]);
+			}
+			else
+				connection.call.apply(connection, [method, new AJAXResponder(id, this)].concat(args));
 			//log("Flash >>> Id:"+id+", uri:" + uri+", method:"+method+", args:"+args);
 		}
 		
