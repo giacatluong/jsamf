@@ -9,8 +9,9 @@ package pl.maliboo.ajax
 
 	public class AMFGateway
 	{
+		private static const CALL_INSTANCE:String = "jsamf.JSAMF.partialMessageHandler";
+		private static const JSON_LENGTH:uint = 30000;
 		
-		private static const JSON_LENGTH:uint = 30000;		
 		private static const gateways:Dictionary = new Dictionary();
 		
 		private var uri:String;
@@ -92,7 +93,7 @@ package pl.maliboo.ajax
 			{
 				var msg:String = jsonString.substr(i*JSON_LENGTH, JSON_LENGTH);
 				msg = msg.replace(/\\/gm, "\\\\");
-				ExternalInterface.call.apply(null, [Callbacks.PARTIAL, id, i, numParts, msg, partialMode]);
+				ExternalInterface.call.apply(null, [CALL_INSTANCE, id, i, numParts, msg, partialMode]);
 			}
 		}
 		
