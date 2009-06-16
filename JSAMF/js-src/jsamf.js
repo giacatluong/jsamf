@@ -1,14 +1,12 @@
-pl = {maliboo:{ajax:{}}};
-
-var jasmf = pl.maliboo.ajax;
+jsamf = {};
 
 /**
  * @param (String) gateway Service URI
  * @param (Boolean) compress If true, Flash use ByteArray compression default false
  */
 //TODO: Poprawic respondera do pushy...
-//TODO: Po stronie flassha obsluzyc synchronicznosc
-pl.maliboo.ajax.JSAMF = function (gateway, compress)
+//TODO: Po stronie flasha obsluzyc synchronicznosc
+jsamf.JSAMF = function (gateway, compress)
 {
 	this.gateway = gateway;
 	this.compress = compress == true;
@@ -16,32 +14,32 @@ pl.maliboo.ajax.JSAMF = function (gateway, compress)
 	var pushResult = function (result)
 	{
 		me.pushResult(result);
-		pl.maliboo.ajax.JSAMF.calls[pl.maliboo.ajax.JSAMF.SERVER_PUSH] = new pl.maliboo.ajax.CallInstance(responder);
+		jsamf.JSAMF.calls[jsamf.JSAMF.SERVER_PUSH] = new jsamf.CallInstance(responder);
 	}
 	var responder = new Responder(pushResult);
-	pl.maliboo.ajax.JSAMF.calls[pl.maliboo.ajax.JSAMF.SERVER_PUSH] = new pl.maliboo.ajax.CallInstance(responder);*/
+	jsamf.JSAMF.calls[jsamf.JSAMF.SERVER_PUSH] = new jsamf.CallInstance(responder);*/
 
 }
 
-pl.maliboo.ajax.JSAMF.SERVER_PUSH = "_jsamf_server_push_";
+jsamf.JSAMF.SERVER_PUSH = "_jsamf_server_push_";
 /**
  * @private
  */
-pl.maliboo.ajax.JSAMF.initialized = false;
+jsamf.JSAMF.initialized = false;
 /**
  * @private
  */
-pl.maliboo.ajax.JSAMF.DIV_NAME = null;
+jsamf.JSAMF.DIV_NAME = null;
 /**
  * @private
  */
-pl.maliboo.ajax.JSAMF.calls = {};
+jsamf.JSAMF.calls = {};
 
 /**
  * @private
  */
 
-pl.maliboo.ajax.JSAMF.initialize = function ()
+jsamf.JSAMF.initialize = function ()
 {
 	//Something usefull here
 }
@@ -49,12 +47,12 @@ pl.maliboo.ajax.JSAMF.initialize = function ()
 /**
  * @private
  * @param (String) id 
- * @return (pl.maliboo.ajax.Responder) Returns responder for given id
+ * @return (jsamf.Responder) Returns responder for given id
  */
 
-pl.maliboo.ajax.JSAMF.getCallById = function (id)
+jsamf.JSAMF.getCallById = function (id)
 {
-	return pl.maliboo.ajax.JSAMF.calls[id];
+	return jsamf.JSAMF.calls[id];
 }
 
 /**
@@ -62,10 +60,10 @@ pl.maliboo.ajax.JSAMF.getCallById = function (id)
  * @param (String) id Releases responder from internal hash map
  */
 
-pl.maliboo.ajax.JSAMF.releaseCallById = function (id)
+jsamf.JSAMF.releaseCallById = function (id)
 {
-	pl.maliboo.ajax.JSAMF.calls[id] = null;
-	delete pl.maliboo.ajax.JSAMF.calls[id];
+	jsamf.JSAMF.calls[id] = null;
+	delete jsamf.JSAMF.calls[id];
 }
 
 /**
@@ -75,13 +73,13 @@ pl.maliboo.ajax.JSAMF.releaseCallById = function (id)
  * @param (Number) total Total parts number
  * @param (String) message Part message
  * @param (Number) partialMode Partial mode for response (result or fault)
- * @see pl.maliboo.ajax.CallInstance.PARTIAL_RESULT
- * @see pl.maliboo.ajax.CallInstance.PARTIAL_FAULT
+ * @see jsamf.CallInstance.PARTIAL_RESULT
+ * @see jsamf.CallInstance.PARTIAL_FAULT
  */
 
-pl.maliboo.ajax.JSAMF.partialMessageHandler = function (id, index, total, message, partialMode)
+jsamf.JSAMF.partialMessageHandler = function (id, index, total, message, partialMode)
 {
-	var callInstance = pl.maliboo.ajax.JSAMF.getCallById(id);
+	var callInstance = jsamf.JSAMF.getCallById(id);
 	callInstance.partialMode = partialMode;
 	callInstance.addPart(index, total, message);
 }
@@ -92,26 +90,26 @@ pl.maliboo.ajax.JSAMF.partialMessageHandler = function (id, index, total, messag
  * @param (Object) result Result object
  */
 
-pl.maliboo.ajax.JSAMF.resultHandler = function (id, result)
+jsamf.JSAMF.resultHandler = function (id, result)
 {
 	console.log(result);
-	var callInstance = pl.maliboo.ajax.JSAMF.getCallById(id);
-	pl.maliboo.ajax.JSAMF.releaseCallById(id);
+	var callInstance = jsamf.JSAMF.getCallById(id);
+	jsamf.JSAMF.releaseCallById(id);
 	callInstance.responder.result(result);
 }
 
 /**
  * @private
  * @param (String) id CallInstance id
- * @param (Object) status Status object (pl.maliboo.ajax.NetStatusObject for eg.)
- * @see pl.maliboo.ajax.NetStatusObject
+ * @param (Object) status Status object (jsamf.NetStatusObject for eg.)
+ * @see jsamf.NetStatusObject
  */
 
-pl.maliboo.ajax.JSAMF.faultHandler = function (id, status)
+jsamf.JSAMF.faultHandler = function (id, status)
 {
 	console.log(status);
-	var callInstance = pl.maliboo.ajax.JSAMF.getCallById(id);
-	pl.maliboo.ajax.JSAMF.releaseCallById(id);
+	var callInstance = jsamf.JSAMF.getCallById(id);
+	jsamf.JSAMF.releaseCallById(id);
 	callInstance.responder.fault(status);
 }
 
@@ -123,13 +121,13 @@ pl.maliboo.ajax.JSAMF.faultHandler = function (id, status)
 //TODO: allowScriptAccess=always!!!!
 //TODO: wmode=transparent?
 //TODO: width,height=1,1
-pl.maliboo.ajax.JSAMF.embedSWF = function (divName, socketServer, width, height)
+jsamf.JSAMF.embedSWF = function (divName, socketServer, width, height)
 {
-	if (pl.maliboo.ajax.JSAMF.DIV_NAME != null)
+	if (jsamf.JSAMF.DIV_NAME != null)
 		throw new Error("Allready embedded!");
 
-	pl.maliboo.ajax.JSAMF.DIV_NAME = divName;
-	var args = pl.maliboo.ajax.argumentsToArray(arguments);
+	jsamf.JSAMF.DIV_NAME = divName;
+	var args = jsamf.argumentsToArray(arguments);
 
 	args = ["../bin-release/JSAMF.swf"].concat(args);
 	
@@ -140,10 +138,10 @@ pl.maliboo.ajax.JSAMF.embedSWF = function (divName, socketServer, width, height)
 	if (args[7].style == undefined)
 		args[7].style = "display:none;";
 
-	swfobject.embedSWF.apply(null, args);
-
+	swfobject.embedSWF.apply(swfobject, args);
+	//swfobject.embedSWF("../bin-release/JSAMF.swf", divName);
 	//jak ustawic styl!?
-	//pl.maliboo.ajax.JSAMF.getMovieElementInternal(divName).style = "display:none;";
+	//jsamf.JSAMF.getMovieElementInternal(divName).style = "display:none;";
 }
 
 
@@ -152,23 +150,23 @@ pl.maliboo.ajax.JSAMF.embedSWF = function (divName, socketServer, width, height)
  * @return (Object) Returns Flash object
  */
 
-pl.maliboo.ajax.JSAMF.getMovieElementInternal = function ()
+jsamf.JSAMF.getMovieElementInternal = function ()
 {
-	return document.getElementById(pl.maliboo.ajax.JSAMF.DIV_NAME);
+	return document.getElementById(jsamf.JSAMF.DIV_NAME);
 }
 
 /**
 * @private
 * @param (String) uri Gateway URI
 * @param (String) method Remote method name
-* @param (pl.maliboo.ajax.CallInstance) callInstance CallInstance object 
+* @param (jsamf.CallInstance) callInstance CallInstance object 
 * @param (Array) args Remote method arguments (0...n)
 */
 
-pl.maliboo.ajax.JSAMF.internalCall = function (uri, method, compress, callInstance, args)
+jsamf.JSAMF.internalCall = function (uri, method, compress, callInstance, args)
 {
-	pl.maliboo.ajax.JSAMF.calls[callInstance.id] = callInstance;
-	var flashObject = pl.maliboo.ajax.JSAMF.getMovieElementInternal();
+	jsamf.JSAMF.calls[callInstance.id] = callInstance;
+	var flashObject = jsamf.JSAMF.getMovieElementInternal();
 	flashObject.callAMF.apply(flashObject, [uri, callInstance.id, method, compress].concat(args));
 }
 
@@ -176,24 +174,21 @@ pl.maliboo.ajax.JSAMF.internalCall = function (uri, method, compress, callInstan
 
 /**
  * @param (String) method Remote method name
- * @param (pl.maliboo.ajax.Responder) responder Responder object
+ * @param (jsamf.Responder) responder Responder object
  * @param ...rest Additional method parameters
  * @throws (Error) Throws error, when result callback is undefined
  */
-pl.maliboo.ajax.JSAMF.prototype.call = function (method, responder)
+jsamf.JSAMF.prototype.call = function (method, responder)
 {
-	//Tutaj trzeba przepisac argumenty do tablicy
-	var args = pl.maliboo.ajax.argumentsToArray(arguments);
-	args.shift(); //method
-	args.shift(); //responder
-	var callInstance = new pl.maliboo.ajax.CallInstance(responder);
-	pl.maliboo.ajax.JSAMF.internalCall.apply(this, [this.gateway, method, this.compress, callInstance].concat(args));
+	var args = jsamf.argumentsToArray(arguments, 2);
+	var callInstance = new jsamf.CallInstance(responder);
+	jsamf.JSAMF.internalCall.apply(this, [this.gateway, method, this.compress, callInstance].concat(args));
 }
 
 /**
  * (Object) Remote method call client object
  */
-pl.maliboo.ajax.JSAMF.prototype.client = null;
+jsamf.JSAMF.prototype.client = null;
 
 
 /**
@@ -201,7 +196,7 @@ pl.maliboo.ajax.JSAMF.prototype.client = null;
  * @param (Object) pushObject Server push object {method: "methodName", body: object}
  * @throws Throws error, when JSAMF.client, or JSAMF.client[methodName] is not defined
 
-pl.maliboo.ajax.JSAMF.prototype.pushResult = function (pushObject)
+jsamf.JSAMF.prototype.pushResult = function (pushObject)
 {
 	if (this.client == null || !(this.client[pushObject.methodName] instanceof Function))
 		throw new Error("Method "+pushObject.methodName+" not defined!");
@@ -212,17 +207,17 @@ pl.maliboo.ajax.JSAMF.prototype.pushResult = function (pushObject)
 /**
  * @return (Boolean) Returns true if exception marshalling is on, otherwise false.
  */
-pl.maliboo.ajax.JSAMF.getMarshallExceptions = function ()
+jsamf.JSAMF.getMarshallExceptions = function ()
 {
-	return pl.maliboo.ajax.JSAMF.getMovieElementInternal().getMarshallExceptions();
+	return jsamf.JSAMF.getMovieElementInternal().getMarshallExceptions();
 }
 /**
  * @param (Boolean) useMarshall Sets marshalling exception to and from Flash
  * @see Flash help for ExternalInterface.marshallExceptions
  */
-pl.maliboo.ajax.JSAMF.setMarshallExceptions = function (useMarshall)
+jsamf.JSAMF.setMarshallExceptions = function (useMarshall)
 {
-	pl.maliboo.ajax.JSAMF.getMovieElementInternal().setMarshallExceptions(marshall);
+	jsamf.JSAMF.getMovieElementInternal().setMarshallExceptions(marshall);
 }
 
 
@@ -230,16 +225,21 @@ pl.maliboo.ajax.JSAMF.setMarshallExceptions = function (useMarshall)
 /**
  * @private
  * @param (Object) args
+ * @param (Number) trim
  * @return (Array)
  */
 //TODO: dodac argument Number - trimujacy z lewej lub z prawej (+/-)
-pl.maliboo.ajax.argumentsToArray = function (args/*, trim*/)
+jsamf.argumentsToArray = function (args, trim)
 {
 	var i = args.length;
 	var arr = [];
 	while (i--)
 		arr[i] = args[i];
-	return arr;
+	if (trim < 0)
+		return arr.slice(0, trim);
+	else
+		return arr.slice(trim);
+	//return arr.slice(0, isNaN(trim)? arr.length : trim);
 }
 
 
@@ -248,7 +248,7 @@ pl.maliboo.ajax.argumentsToArray = function (args/*, trim*/)
  * @param (Function) fault
  * @throws (Error) Throws error, when result callback is undefined
  */
-pl.maliboo.ajax.Responder = function (result, fault)
+jsamf.Responder = function (result, fault)
 {
 	if (result == null && this.result == null)
 		throw new Error("No result function in Responder!");
@@ -260,31 +260,31 @@ pl.maliboo.ajax.Responder = function (result, fault)
 /**
  * @param (Object) result
  */
-pl.maliboo.ajax.Responder.prototype.result = function (result){};
+jsamf.Responder.prototype.result = function (result){};
 
 /**
- * @param (pl.maliboo.ajax.NetStatusObject) status
+ * @param (jsamf.NetStatusObject) status
  */
-pl.maliboo.ajax.Responder.prototype.fault = function (status){};
+jsamf.Responder.prototype.fault = function (status){};
 
 
 
 /**
  * @private
- * @param (pl.maliboo.ajax.Responder) responder
+ * @param (jsamf.Responder) responder
  */
-pl.maliboo.ajax.CallInstance = function (responder)
+jsamf.CallInstance = function (responder)
 {
-	this.id = "id_" + pl.maliboo.ajax.CallInstance.id++;
+	this.id = "id_" + jsamf.CallInstance.id++;
 	this.responder = responder;
 	this.rcvBuffer = [];
 	this.rcvParts = 0;
 	this.rcvTotal = -1;
 }
 
-pl.maliboo.ajax.CallInstance.id = 0;
-pl.maliboo.ajax.CallInstance.PARTIAL_RESULT = 0;
-pl.maliboo.ajax.CallInstance.PARTIAL_FAULT = 1;
+jsamf.CallInstance.id = 0;
+jsamf.CallInstance.PARTIAL_RESULT = 0;
+jsamf.CallInstance.PARTIAL_FAULT = 1;
 
 /**
  * @private
@@ -293,7 +293,7 @@ pl.maliboo.ajax.CallInstance.PARTIAL_FAULT = 1;
  * @param (String) message
  * @throws (Error) Throws error, when total parts not equal previous length
  */
-pl.maliboo.ajax.CallInstance.prototype.addPart = function (index, total, message)
+jsamf.CallInstance.prototype.addPart = function (index, total, message)
 {
 	//console.log("Part "+index+"/"+total+" = "+message);
 	this.rcvBuffer[index] = message;
@@ -308,22 +308,22 @@ pl.maliboo.ajax.CallInstance.prototype.addPart = function (index, total, message
 /**
  * @private
  */
-pl.maliboo.ajax.CallInstance.prototype.finalize = function()
+jsamf.CallInstance.prototype.finalize = function()
 {
 	var message = null;
 	//console.log("String length: "+this.rcvBuffer.length);
 	try
 	{
 		eval("message = "+this.rcvBuffer.join(""));
-		pl.maliboo.ajax.JSAMF.resultHandler(this.id, message);
+		jsamf.JSAMF.resultHandler(this.id, message);
 	}
 	catch (e)
 	{
 		//console.log("Dammit, something's fucked!");
-		var status = new NetStatusObject(pl.maliboo.ajax.StatusLevel.ERROR, 
-			pl.maliboo.ajax.StatusCode.RESPONDER_FRAGMENTATION);
+		var status = new NetStatusObject(jsamf.StatusLevel.ERROR, 
+			jsamf.StatusCode.RESPONDER_FRAGMENTATION);
 		status.content = this;
-		pl.maliboo.ajax.JSAMF.faultHandler(this.id, message);
+		jsamf.JSAMF.faultHandler(this.id, message);
 		//console.log(this.rcvBuffer);
 	}
 }
@@ -336,23 +336,20 @@ pl.maliboo.ajax.CallInstance.prototype.finalize = function()
  * @param (String) level
  * @param (String) code 
  */
-pl.maliboo.ajax.NetStatusObject = function (level, code)
+jsamf.NetStatusObject = function (level, code)
 {
 	this.level = level;
 	this.code = code;
 }
 
-pl.maliboo.ajax.NetStatusObject.prototype.level;
-pl.maliboo.ajax.NetStatusObject.prototype.code;
-
-pl.maliboo.ajax.StatusLevel = 
+jsamf.StatusLevel = 
 {
 	STATUS: "status",
 	ERROR: "error",
 	WARNING: "warning"
 }
 
-pl.maliboo.ajax.StatusCode = 
+jsamf.StatusCode = 
 {
 	BAD_VERSION: "NetConnection.Call.BadVersion", //error
 	CALL_FAILED: "NetConnection.Call.Failed", //error
@@ -373,12 +370,12 @@ pl.maliboo.ajax.StatusCode =
  * @param (String) divName 
  * @param (String) initCallbackName 
  */
-/*pl.maliboo.ajax.InitObject = function (divName, initCallbackName)
+/*jsamf.InitObject = function (divName, initCallbackName)
 {
 	if (divName == undefined || divName.length == 0)
 		throw new Error("Parameter divName omitted!");
 	this.initCallbackName = initCallbackName == undefined? 
-		"pl.maliboo.ajax.JSAMF.initialize" : initCallbackName;
+		"jsamf.JSAMF.initialize" : initCallbackName;
 }
 */
 
@@ -391,6 +388,6 @@ pl.maliboo.ajax.StatusCode =
 * + pakowanie argumentow (problem tablic?):
 * 	problem odpowiedzi: nie istnieje, zawsze dostajemy jeden obiekt
 * 	problem zapytan: serwis musi dekorowac konkretna f-cje i wtedy dostaje tablice argumentow
-* - pl.maliboo.ajax > jsamf (jako var?)
+* - jsamf > jsamf (jako var?)
 * - FMS client?
 */
