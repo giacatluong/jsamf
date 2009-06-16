@@ -1,7 +1,5 @@
 package pl.maliboo.ajax
 {
-	import com.serialization.json.JSON;
-	
 	import flash.external.ExternalInterface;
 	import flash.net.NetConnection;
 	import flash.utils.ByteArray;
@@ -9,8 +7,8 @@ package pl.maliboo.ajax
 
 	public class AMFGateway
 	{
-		private static const CALL_INSTANCE:String = "jsamf.JSAMF.partialMessageHandler";
-		private static const JSON_LENGTH:uint = 30000;
+		public static const CALL_INSTANCE:String = "jsamf.JSAMF.partialMessageHandler";
+		public static const JSON_LENGTH:uint = 30000;
 		
 		private static const gateways:Dictionary = new Dictionary();
 		
@@ -77,24 +75,25 @@ package pl.maliboo.ajax
 		
 		public function result(id:String, result:*):void
 		{
-			sendResponse(ResponseType.RESULT, id, result);
+			sendResponse(id, ResponseType.RESULT, result);
 		}
 		
 		public function fault(id:String, status:Object):void
 		{
-			sendResponse(ResponseType.FAULT, id, status);
+			sendResponse(id, ResponseType.FAULT, status);
 		}
 		
-		private function sendResponse(partialMode:int, id:String, message:*):void
+		private function sendResponse(id:String, partialMode:int, message:*):void
 		{
-			var jsonString:String = JSON.serialize(message);		
+			/*var jsonString:String = JSON.serialize(message);	
 			var numParts:uint = Math.ceil(jsonString.length/JSON_LENGTH);
 			for (var i:int = 0; i < numParts; i++)
 			{
 				var msg:String = jsonString.substr(i*JSON_LENGTH, JSON_LENGTH);
 				msg = msg.replace(/\\/gm, "\\\\");
 				ExternalInterface.call.apply(null, [CALL_INSTANCE, id, i, numParts, msg, partialMode]);
-			}
+			}*/
+			AsyncCaller.addCaller(new AsyncCaller(id, partialMode, message, JSON_LENGTH));
 		}
 		
 		private function log(text:String):void
