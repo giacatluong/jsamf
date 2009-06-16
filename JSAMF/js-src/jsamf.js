@@ -295,7 +295,7 @@ jsamf.CallInstance.PARTIAL_FAULT = 1;
  */
 jsamf.CallInstance.prototype.addPart = function (index, total, message)
 {
-	//console.log("Part "+index+"/"+total+" = "+message);
+	console.log(this.id+"@part "+index+"/"+total);
 	this.rcvBuffer[index] = message;
 	this.rcvParts++;
 	if (this.rcvTotal != -1 && this.rcvTotal != total)
