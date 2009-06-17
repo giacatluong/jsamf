@@ -65,22 +65,50 @@ package pl.maliboo.ajax
 				var ba:ByteArray = new ByteArray();
 				ba.writeObject(args);
 				ba.compress();
-				connection.call.apply(connection, [method, new AJAXResponder(id, this), ba]);
+				connection.call.apply(connection, [method, new AJAXResponder(id, this, true), ba]);
 			}
 			else
-				connection.call.apply(connection, [method, new AJAXResponder(id, this)].concat(args));
-			//log("Flash >>> Id:"+id+", uri:" + uri+", method:"+method+", args:"+args);
+				connection.call.apply(connection, [method, new AJAXResponder(id, this, false)].concat(args));
+			//log("Flash >>> Id:"+id+", uri:" + uri+", method:"+method+", args:"+args+", compress: "+compress+(compress? ", size: "+ba.length : ""));
 		}
 		
 		
-		public function result(id:String, result:*):void
+		public function result(id:String, result:*, compress:Boolean):void
 		{
-			sendResponse(id, ResponseType.RESULT, result);
+			sendResponse(id, ResponseType.RESULT, tryDecompress(result, compress));
+			//log("Flash >>> Result - Id:"+id+", result:"+tryDecompress(result, compress)+", compress: "+compress);
 		}
 		
-		public function fault(id:String, status:Object):void
+		public function fault(id:String, status:Object, compress:Boolean):void
 		{
-			sendResponse(id, ResponseType.FAULT, status);
+			sendResponse(id, ResponseType.FAULT, tryDecompress(result, compress));
+		}
+		
+		private function tryDecompress(response:*, compress:Boolean):*
+		{
+			if (compress == false || !(response is ByteArray))
+				return response;
+			var ba:ByteArray = response as ByteArray;
+			var object:* = null;
+			
+			try
+			{
+				ba.uncompress();
+			}
+			catch (e:Error){}
+			
+			try
+			{
+				ba.position = 0;
+				object = ba.readObject();
+				//try to read next object, throw warning if position != length-1?!
+			}
+			catch (e:Error)
+			{
+				//throw Error to JS!?
+				log("Flash >>> Cannot decompress ByteArray("+ba.length+")");
+			}
+			return object;
 		}
 		
 		private function sendResponse(id:String, partialMode:int, message:*):void
