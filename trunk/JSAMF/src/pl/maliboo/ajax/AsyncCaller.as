@@ -3,6 +3,7 @@ package pl.maliboo.ajax
 	import com.serialization.json.JSON;
 	
 	import flash.external.ExternalInterface;
+	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
 
 	public class AsyncCaller
@@ -29,7 +30,9 @@ package pl.maliboo.ajax
 		
 		private function start():void
 		{
+			//var t:uint = getTimer();
 			json = JSON.serialize(message);
+			//ExternalInterface.call("console.log", "JSON Time: "+(getTimer()-t));
 			numParts = Math.ceil(json.length/messageLength);
 			message = null;
 			pointer = 0;

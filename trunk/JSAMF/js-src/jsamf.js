@@ -382,12 +382,9 @@ jsamf.StatusCode =
 
 /*
 * TODO:
-*
+* - obsluga bledow
 * - kanal zwrotny /server push/
-* - pakietowanie asynchroniczne i nie w kolejnosci
-* + pakowanie argumentow (problem tablic?):
-* 	problem odpowiedzi: nie istnieje, zawsze dostajemy jeden obiekt
-* 	problem zapytan: serwis musi dekorowac konkretna f-cje i wtedy dostaje tablice argumentow
-* - jsamf > jsamf (jako var?)
+* + pakietowanie asynchroniczne ...
+* - ...i nie w kolejnosci (per instancja)
 * - FMS client?
 */
