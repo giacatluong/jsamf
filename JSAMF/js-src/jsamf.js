@@ -47,7 +47,7 @@ jsamf.JSAMF.initialize = function ()
 /**
  * @private
  * @param (String) id 
- * @return (jsamf.Responder) Returns responder for given id
+ * @return (jsamf.CallInstance) Returns responder for given id
  */
 
 jsamf.JSAMF.getCallById = function (id)
@@ -58,12 +58,15 @@ jsamf.JSAMF.getCallById = function (id)
 /**
  * @private
  * @param (String) id Releases responder from internal hash map
+ * @return (jsamf.CallInstance)
  */
 
 jsamf.JSAMF.releaseCallById = function (id)
 {
+	var callInstance = jsamf.JSAMF.calls[id];
 	jsamf.JSAMF.calls[id] = null;
 	delete jsamf.JSAMF.calls[id];
+	return callInstance;
 }
 
 /**
@@ -93,8 +96,7 @@ jsamf.JSAMF.partialMessageHandler = function (id, index, total, message, partial
 jsamf.JSAMF.resultHandler = function (id, result)
 {
 	console.log(result);
-	var callInstance = jsamf.JSAMF.getCallById(id);
-	jsamf.JSAMF.releaseCallById(id);
+	var callInstance = jsamf.JSAMF.releaseCallById(id);
 	callInstance.responder.result(result);
 }
 
@@ -108,8 +110,7 @@ jsamf.JSAMF.resultHandler = function (id, result)
 jsamf.JSAMF.faultHandler = function (id, status)
 {
 	console.log(status);
-	var callInstance = jsamf.JSAMF.getCallById(id);
-	jsamf.JSAMF.releaseCallById(id);
+	var callInstance = jsamf.JSAMF.releaseCallById(id);
 	callInstance.responder.fault(status);
 }
 
@@ -315,6 +316,7 @@ jsamf.CallInstance.prototype.finalize = function()
 	try
 	{
 		eval("message = "+this.rcvBuffer.join(""));
+		//this.rcvBuffer = null; //Hmmm should I clean it "just in case"?
 		jsamf.JSAMF.resultHandler(this.id, message);
 	}
 	catch (e)

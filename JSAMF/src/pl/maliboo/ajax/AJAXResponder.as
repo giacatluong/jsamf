@@ -4,26 +4,26 @@ package pl.maliboo.ajax
 	
 	public class AJAXResponder extends Responder
 	{
-		private var uid:String;
+		private var id:String;
 		private var gateway:AMFGateway;
-		private var compress:Boolean;
+		private var compressed:Boolean;
 		
-		public function AJAXResponder(uid:String, gateway:AMFGateway, compress:Boolean=false)
+		public function AJAXResponder(id:String, gateway:AMFGateway, compressed:Boolean=false)
 		{
-			this.uid = uid;
+			this.id = id;
 			this.gateway = gateway;
-			this.compress = compress;
+			this.compressed = compressed;
 			super(result, fault);
 		}
 		
 		private function fault(status:Object):void
 		{
-			gateway.fault(uid, status, compress);
+			gateway.fault(id, status, compressed);
 		}
 		
 		private function result(result:*):void
 		{
-			gateway.result(uid, result, compress);
+			gateway.result(id, result, compressed);
 		}
 	}
 }
