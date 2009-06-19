@@ -296,7 +296,7 @@ jsamf.CallInstance.PARTIAL_FAULT = 1;
  */
 jsamf.CallInstance.prototype.addPart = function (index, total, message)
 {
-	console.log(this.id+"@part "+index+"/"+total);
+	//console.log(this.id+"@part "+index+"/"+total);
 	this.rcvBuffer[index] = message;
 	this.rcvParts++;
 	if (this.rcvTotal != -1 && this.rcvTotal != total)
@@ -315,15 +315,17 @@ jsamf.CallInstance.prototype.finalize = function()
 	//console.log("String length: "+this.rcvBuffer.length);
 	try
 	{
-		eval("message = "+this.rcvBuffer.join(""));
+		//Surprinsinlgy this method is 2x faster than:
+		//eval("message = "+this.rcvBuffer.join(""));
+		var joinedBuff = this.rcvBuffer.join("");
+		eval("message = "+joinedBuff);
 		//this.rcvBuffer = null; //Hmmm should I clean it "just in case"?
 		jsamf.JSAMF.resultHandler(this.id, message);
 	}
 	catch (e)
 	{
 		//console.log("Dammit, something's fucked!");
-		var status = new NetStatusObject(jsamf.StatusLevel.ERROR, 
-			jsamf.StatusCode.RESPONDER_FRAGMENTATION);
+		var status = new NetStatusObject(jsamf.StatusLevel.ERROR, jsamf.StatusCode.RESPONDER_FRAGMENTATION);
 		status.content = this;
 		jsamf.JSAMF.faultHandler(this.id, message);
 		//console.log(this.rcvBuffer);
