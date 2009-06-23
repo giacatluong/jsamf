@@ -10,18 +10,9 @@ jsamf.JSAMF = function (gateway, compress)
 {
 	this.gateway = gateway;
 	this.compress = compress == true;
-/*	var me = this;
-	var pushResult = function (result)
-	{
-		me.pushResult(result);
-		jsamf.JSAMF.calls[jsamf.JSAMF.SERVER_PUSH] = new jsamf.CallInstance(responder);
-	}
-	var responder = new Responder(pushResult);
-	jsamf.JSAMF.calls[jsamf.JSAMF.SERVER_PUSH] = new jsamf.CallInstance(responder);*/
-
+	this.id = jsamf.generateId();
 }
 
-jsamf.JSAMF.SERVER_PUSH = "_jsamf_server_push_";
 /**
  * @private
  */
@@ -88,33 +79,6 @@ jsamf.JSAMF.partialMessageHandler = function (id, index, total, message, partial
 }
 
 /**
- * @private
- * @param (String) id Responder id
- * @param (Object) result Result object
- */
-
-jsamf.JSAMF.resultHandler = function (id, result)
-{
-	console.log(result);
-	var callInstance = jsamf.JSAMF.releaseCallById(id);
-	callInstance.responder.result(result);
-}
-
-/**
- * @private
- * @param (String) id CallInstance id
- * @param (Object) status Status object (jsamf.NetStatusObject for eg.)
- * @see jsamf.NetStatusObject
- */
-
-jsamf.JSAMF.faultHandler = function (id, status)
-{
-	console.log(status);
-	var callInstance = jsamf.JSAMF.releaseCallById(id);
-	callInstance.responder.fault(status);
-}
-
-/**
 * @param (String) divName DIV name to embed flash control
 * @param (String) socketServer Socket server address for push calls
 * @throws (Error) Throws error, when JSAMF allready embedded
@@ -156,22 +120,6 @@ jsamf.JSAMF.getMovieElementInternal = function ()
 	return document.getElementById(jsamf.JSAMF.DIV_NAME);
 }
 
-/**
-* @private
-* @param (String) uri Gateway URI
-* @param (String) method Remote method name
-* @param (jsamf.CallInstance) callInstance CallInstance object 
-* @param (Array) args Remote method arguments (0...n)
-*/
-
-jsamf.JSAMF.internalCall = function (uri, method, compress, callInstance, args)
-{
-	jsamf.JSAMF.calls[callInstance.id] = callInstance;
-	var flashObject = jsamf.JSAMF.getMovieElementInternal();
-	flashObject.callAMF.apply(flashObject, [uri, callInstance.id, method, compress].concat(args));
-}
-
-
 
 /**
  * @param (String) method Remote method name
@@ -181,30 +129,39 @@ jsamf.JSAMF.internalCall = function (uri, method, compress, callInstance, args)
  */
 jsamf.JSAMF.prototype.call = function (method, responder)
 {
+	var flashObject = jsamf.JSAMF.getMovieElementInternal();
+	var callInstance = new jsamf.CallInstance(this, responder);
+	jsamf.JSAMF.calls[callInstance.id] = callInstance;
 	var args = jsamf.argumentsToArray(arguments, 2);
-	var callInstance = new jsamf.CallInstance(responder);
-	jsamf.JSAMF.internalCall.apply(this, [this.gateway, method, this.compress, callInstance].concat(args));
+	flashObject.callAMF.apply(flashObject, [this.gateway, callInstance.id, method, this.compress].concat(args));
 }
-
-/**
- * (Object) Remote method call client object
- */
-jsamf.JSAMF.prototype.client = null;
-
 
 /**
  * @private
- * @param (Object) pushObject Server push object {method: "methodName", body: object}
- * @throws Throws error, when JSAMF.client, or JSAMF.client[methodName] is not defined
-
-jsamf.JSAMF.prototype.pushResult = function (pushObject)
-{
-	if (this.client == null || !(this.client[pushObject.methodName] instanceof Function))
-		throw new Error("Method "+pushObject.methodName+" not defined!");
-	this.client[pushObject.methodName](pushObject.body);
-}
+ * @param (String) id Responder id
+ * @param (Object) result Result object
  */
- 
+
+jsamf.JSAMF.prototype.resultHandler = function (id, result)
+{
+	console.log(result);
+	jsamf.JSAMF.releaseCallById(id).responder.result(result);
+}
+
+/**
+ * @private
+ * @param (String) id CallInstance id
+ * @param (Object) status Status object (jsamf.NetStatusObject for eg.)
+ * @see jsamf.NetStatusObject
+ */
+
+jsamf.JSAMF.prototype.faultHandler = function (id, status)
+{
+	console.log(status);
+	jsamf.JSAMF.releaseCallById(id).responder.fault(status);
+}
+
+
 /**
  * @return (Boolean) Returns true if exception marshalling is on, otherwise false.
  */
@@ -216,31 +173,9 @@ jsamf.JSAMF.getMarshallExceptions = function ()
  * @param (Boolean) useMarshall Sets marshalling exception to and from Flash
  * @see Flash help for ExternalInterface.marshallExceptions
  */
-jsamf.JSAMF.setMarshallExceptions = function (useMarshall)
+jsamf.JSAMF.setMarshallExceptions = function (useMarshalling)
 {
-	jsamf.JSAMF.getMovieElementInternal().setMarshallExceptions(marshall);
-}
-
-
-
-/**
- * @private
- * @param (Object) args
- * @param (Number) trim
- * @return (Array)
- */
-//TODO: dodac argument Number - trimujacy z lewej lub z prawej (+/-)
-jsamf.argumentsToArray = function (args, trim)
-{
-	var i = args.length;
-	var arr = [];
-	while (i--)
-		arr[i] = args[i];
-	if (trim < 0)
-		return arr.slice(0, trim);
-	else
-		return arr.slice(trim);
-	//return arr.slice(0, isNaN(trim)? arr.length : trim);
+	jsamf.JSAMF.getMovieElementInternal().setMarshallExceptions(useMarshalling);
 }
 
 
@@ -269,21 +204,52 @@ jsamf.Responder.prototype.result = function (result){};
 jsamf.Responder.prototype.fault = function (status){};
 
 
+/**
+ * @private
+ * @param (Object) args
+ * @param (Number) trim
+ * @return (Array)
+ */
+//TODO: dodac argument Number - trimujacy z lewej lub z prawej (+/-)
+jsamf.argumentsToArray = function (args, trim)
+{
+	var i = args.length;
+	var arr = [];
+	while (i--)
+		arr[i] = args[i];
+	if (trim < 0)
+		return arr.slice(0, trim);
+	else
+		return arr.slice(trim);
+	//return arr.slice(0, isNaN(trim)? arr.length : trim);
+}
 
 /**
  * @private
+ * @return (String) Returns unique id
+ */
+jsamf.generateId = function ()
+{
+	return "jsamf_"+jsamf.instance_id++;
+}
+jsamf.instance_id = 0;
+
+
+/**
+ * @private
+ * @param (jsamf.JSAMF) owner
  * @param (jsamf.Responder) responder
  */
-jsamf.CallInstance = function (responder)
+jsamf.CallInstance = function (owner, responder)
 {
-	this.id = "id_" + jsamf.CallInstance.id++;
+	this.id = jsamf.generateId();
+	this.owner = owner;
 	this.responder = responder;
 	this.rcvBuffer = [];
 	this.rcvParts = 0;
 	this.rcvTotal = -1;
 }
 
-jsamf.CallInstance.id = 0;
 jsamf.CallInstance.PARTIAL_RESULT = 0;
 jsamf.CallInstance.PARTIAL_FAULT = 1;
 
@@ -320,14 +286,14 @@ jsamf.CallInstance.prototype.finalize = function()
 		var joinedBuff = this.rcvBuffer.join("");
 		eval("message = "+joinedBuff);
 		//this.rcvBuffer = null; //Hmmm should I clean it "just in case"?
-		jsamf.JSAMF.resultHandler(this.id, message);
+		this.owner.resultHandler(this.id, message);
 	}
 	catch (e)
 	{
 		//console.log("Dammit, something's fucked!");
 		var status = new NetStatusObject(jsamf.StatusLevel.ERROR, jsamf.StatusCode.RESPONDER_FRAGMENTATION);
 		status.content = this;
-		jsamf.JSAMF.faultHandler(this.id, message);
+		this.owner.faultHandler(this.id, message);
 		//console.log(this.rcvBuffer);
 	}
 }
@@ -386,6 +352,7 @@ jsamf.StatusCode =
 
 /*
 * TODO:
+* - CallInstance id per JSAMF instancja (dla socketow!!!)
 * - obsluga bledow
 * - kanal zwrotny /server push/
 * + pakietowanie asynchroniczne ...
