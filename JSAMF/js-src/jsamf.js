@@ -352,10 +352,10 @@ jsamf.StatusCode =
 
 /*
 * TODO:
-* - CallInstance id per JSAMF instancja (dla socketow!!!)
 * - obsluga bledow
 * - kanal zwrotny /server push/
 * + pakietowanie asynchroniczne ...
 * - ...i nie w kolejnosci (per instancja)
 * - FMS client?
+* - globalna obsluga socketow, gdzie id=socket:IP,port? A moze openSocket() w JSAMF?
 */
