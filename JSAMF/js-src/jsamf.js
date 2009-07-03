@@ -8,7 +8,7 @@ jsamf = {};
  */
 //TODO: Poprawic respondera do pushy...
 //TODO: Po stronie flasha obsluzyc synchronicznosc
-jsamf.JSAMF = function (gateway, compress)
+jsamf.JSAMF = function (gateway, compress/*= true*/)
 {
 	/**
 	 * @type {String}
@@ -96,7 +96,7 @@ jsamf.JSAMF.partialMessageHandler = function (id, index, total, message, partial
 /**
 * @param {String} divName DIV name to embed flash control
 * @param {String} socketServer Socket server address for push calls
-* @throws {Error} Throws error, when JSAMF allready embedded
+* @exception {Error} Throws error, when JSAMF allready embedded
 */
 //TODO: allowScriptAccess=always!!!!
 //TODO: wmode=transparent?
@@ -141,7 +141,7 @@ jsamf.JSAMF.getMovieElementInternal = function ()
  * @param {jsamf.Responder} responder Responder object
  * @param {Object} ... Additional method parameters
  * @see jsamf.Responder
- * @throws {Error} Throws error, when result callback is undefined
+ * @exception {Error} Throws error, when result callback is undefined
  */
 jsamf.JSAMF.prototype.call = function (method, responder)
 {
@@ -200,7 +200,7 @@ jsamf.JSAMF.setMarshallExceptions = function (useMarshalling)
  * @param {Function} result Result handler
  * @param {Function} [fault] Fault handler (optional)
  * @return {jsamf.Responder}
- * @throws {Error} Throws error, when result callback is undefined
+ * @exception {Error} Throws error, when result callback is undefined
  */
 jsamf.Responder = function (result, fault)
 {
@@ -255,7 +255,6 @@ jsamf.instance_id = 0;
 
 /**
  * @constructor
- * @private
  * @param {jsamf.JSAMF} owner
  * @param {jsamf.Responder} responder
  * @return {jsamf.CallInstance}
@@ -290,6 +289,7 @@ jsamf.CallInstance = function (owner, responder)
 	 */
 	this.rcvTotal = -1;
 	/**
+	 * @private
 	 * @type {Number}
 	 */
 	this.partialMode = -1;
@@ -308,7 +308,7 @@ jsamf.CallInstance.PARTIAL_FAULT = 1;
  * @param {Number} index
  * @param {Number} total
  * @param {String} message
- * @throws {Error} Throws error, when total parts not equal previous length
+ * @exception {Error} Throws error, when total parts not equal previous length
  */
 jsamf.CallInstance.prototype.addPart = function (index, total, message)
 {
@@ -323,7 +323,7 @@ jsamf.CallInstance.prototype.addPart = function (index, total, message)
 }
 
 /**
- * @private
+ * Finalize 
  */
 jsamf.CallInstance.prototype.finalize = function()
 {
