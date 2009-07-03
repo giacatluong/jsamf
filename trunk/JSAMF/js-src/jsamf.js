@@ -1,28 +1,43 @@
 jsamf = {};
 
 /**
- * @param (String) gateway Service URI
- * @param (Boolean) compress If true, Flash use ByteArray compression default false
+ * @constructor 
+ * @param {String} gateway Service URI
+ * @param {Boolean} compress If true, Flash use ByteArray compression default false
+ * @return {jsamf.JSAMF}
  */
 //TODO: Poprawic respondera do pushy...
 //TODO: Po stronie flasha obsluzyc synchronicznosc
 jsamf.JSAMF = function (gateway, compress)
 {
+	/**
+	 * @type {String}
+	 */
 	this.gateway = gateway;
+	/**
+	 * @type {Boolean}
+	 */
 	this.compress = compress == true;
+	/**
+	 * @private
+	 * @type {String}
+	 */
 	this.id = jsamf.generateId();
 }
 
 /**
  * @private
+ * @type {Boolean}
  */
 jsamf.JSAMF.initialized = false;
 /**
  * @private
+ * @type {String}
  */
 jsamf.JSAMF.DIV_NAME = null;
 /**
  * @private
+ * @type {Object}
  */
 jsamf.JSAMF.calls = {};
 
@@ -37,8 +52,8 @@ jsamf.JSAMF.initialize = function ()
 
 /**
  * @private
- * @param (String) id 
- * @return (jsamf.CallInstance) Returns responder for given id
+ * @param {String} id 
+ * @return {jsamf.CallInstance} Returns responder for given id
  */
 
 jsamf.JSAMF.getCallById = function (id)
@@ -48,8 +63,8 @@ jsamf.JSAMF.getCallById = function (id)
 
 /**
  * @private
- * @param (String) id Releases responder from internal hash map
- * @return (jsamf.CallInstance)
+ * @param {String} id Releases responder from internal hash map
+ * @return {jsamf.CallInstance}
  */
 
 jsamf.JSAMF.releaseCallById = function (id)
@@ -62,11 +77,11 @@ jsamf.JSAMF.releaseCallById = function (id)
 
 /**
  * @private
- * @param (String) id Responder id
- * @param (Number) index Part index
- * @param (Number) total Total parts number
- * @param (String) message Part message
- * @param (Number) partialMode Partial mode for response (result or fault)
+ * @param {String} id Responder id
+ * @param {Number} index Part index
+ * @param {Number} total Total parts number
+ * @param {String} message Part message
+ * @param {Number} partialMode Partial mode for response (result or fault)
  * @see jsamf.CallInstance.PARTIAL_RESULT
  * @see jsamf.CallInstance.PARTIAL_FAULT
  */
@@ -79,9 +94,9 @@ jsamf.JSAMF.partialMessageHandler = function (id, index, total, message, partial
 }
 
 /**
-* @param (String) divName DIV name to embed flash control
-* @param (String) socketServer Socket server address for push calls
-* @throws (Error) Throws error, when JSAMF allready embedded
+* @param {String} divName DIV name to embed flash control
+* @param {String} socketServer Socket server address for push calls
+* @throws {Error} Throws error, when JSAMF allready embedded
 */
 //TODO: allowScriptAccess=always!!!!
 //TODO: wmode=transparent?
@@ -94,7 +109,7 @@ jsamf.JSAMF.embedSWF = function (divName, socketServer, width, height)
 	jsamf.JSAMF.DIV_NAME = divName;
 	var args = jsamf.argumentsToArray(arguments);
 
-	args = ["../bin-release/JSAMF.swf"].concat(args);
+	args = ["JSAMF.swf"].concat(args);
 	
 	//Cos mi tu nie dziala z display:none
 
@@ -112,7 +127,7 @@ jsamf.JSAMF.embedSWF = function (divName, socketServer, width, height)
 
 /**
  * @private
- * @return (Object) Returns Flash object
+ * @return {Object} Returns Flash object
  */
 
 jsamf.JSAMF.getMovieElementInternal = function ()
@@ -122,10 +137,11 @@ jsamf.JSAMF.getMovieElementInternal = function ()
 
 
 /**
- * @param (String) method Remote method name
- * @param (jsamf.Responder) responder Responder object
- * @param ...rest Additional method parameters
- * @throws (Error) Throws error, when result callback is undefined
+ * @param {String} method Remote method name
+ * @param {jsamf.Responder} responder Responder object
+ * @param {Object} ... Additional method parameters
+ * @see jsamf.Responder
+ * @throws {Error} Throws error, when result callback is undefined
  */
 jsamf.JSAMF.prototype.call = function (method, responder)
 {
@@ -138,8 +154,8 @@ jsamf.JSAMF.prototype.call = function (method, responder)
 
 /**
  * @private
- * @param (String) id Responder id
- * @param (Object) result Result object
+ * @param {String} id Responder id
+ * @param {Object} result Result object
  */
 
 jsamf.JSAMF.prototype.resultHandler = function (id, result)
@@ -150,8 +166,8 @@ jsamf.JSAMF.prototype.resultHandler = function (id, result)
 
 /**
  * @private
- * @param (String) id CallInstance id
- * @param (Object) status Status object (jsamf.NetStatusObject for eg.)
+ * @param {String} id CallInstance id
+ * @param {Object} status Status object (jsamf.NetStatusObject for eg.)
  * @see jsamf.NetStatusObject
  */
 
@@ -163,14 +179,14 @@ jsamf.JSAMF.prototype.faultHandler = function (id, status)
 
 
 /**
- * @return (Boolean) Returns true if exception marshalling is on, otherwise false.
+ * @return {Boolean} Returns true if exception marshalling is on, otherwise false.
  */
 jsamf.JSAMF.getMarshallExceptions = function ()
 {
 	return jsamf.JSAMF.getMovieElementInternal().getMarshallExceptions();
 }
 /**
- * @param (Boolean) useMarshall Sets marshalling exception to and from Flash
+ * @param {Boolean} useMarshall Sets marshalling exception to and from Flash
  * @see Flash help for ExternalInterface.marshallExceptions
  */
 jsamf.JSAMF.setMarshallExceptions = function (useMarshalling)
@@ -180,9 +196,11 @@ jsamf.JSAMF.setMarshallExceptions = function (useMarshalling)
 
 
 /**
- * @param (Function) result 
- * @param (Function) fault
- * @throws (Error) Throws error, when result callback is undefined
+ * @constructor
+ * @param {Function} result Result handler
+ * @param {Function} [fault] Fault handler (optional)
+ * @return {jsamf.Responder}
+ * @throws {Error} Throws error, when result callback is undefined
  */
 jsamf.Responder = function (result, fault)
 {
@@ -194,21 +212,21 @@ jsamf.Responder = function (result, fault)
 }
 
 /**
- * @param (Object) result
+ * @param {Object} result
  */
 jsamf.Responder.prototype.result = function (result){};
 
 /**
- * @param (jsamf.NetStatusObject) status
+ * @param {jsamf.NetStatusObject} status
  */
 jsamf.Responder.prototype.fault = function (status){};
 
 
 /**
  * @private
- * @param (Object) args
- * @param (Number) trim
- * @return (Array)
+ * @param {Object} args
+ * @param {Number} trim
+ * @return {Array}
  */
 //TODO: dodac argument Number - trimujacy z lewej lub z prawej (+/-)
 jsamf.argumentsToArray = function (args, trim)
@@ -226,7 +244,7 @@ jsamf.argumentsToArray = function (args, trim)
 
 /**
  * @private
- * @return (String) Returns unique id
+ * @return {String} Returns unique id
  */
 jsamf.generateId = function ()
 {
@@ -236,29 +254,61 @@ jsamf.instance_id = 0;
 
 
 /**
+ * @constructor
  * @private
- * @param (jsamf.JSAMF) owner
- * @param (jsamf.Responder) responder
+ * @param {jsamf.JSAMF} owner
+ * @param {jsamf.Responder} responder
+ * @return {jsamf.CallInstance}
  */
 jsamf.CallInstance = function (owner, responder)
 {
+	/**
+	 * @type {String}
+	 */
 	this.id = jsamf.generateId();
+	/**
+	 * @type {jsamf.JSAMF}
+	 */
 	this.owner = owner;
+	/**
+	 * @type {jsamf.Responder}
+	 */
 	this.responder = responder;
+	/**
+	 * @private
+	 * @type {Array}
+	 */
 	this.rcvBuffer = [];
+	/**
+	 * @private
+	 * @type {Number}
+	 */
 	this.rcvParts = 0;
+	/**
+	 * @private
+	 * @type {Number}
+	 */
 	this.rcvTotal = -1;
+	/**
+	 * @type {Number}
+	 */
+	this.partialMode = -1;
 }
 
+/**
+ * @type {Number}
+ */
 jsamf.CallInstance.PARTIAL_RESULT = 0;
+/**
+ * @type {Number}
+ */
 jsamf.CallInstance.PARTIAL_FAULT = 1;
 
 /**
- * @private
- * @param (Number) index
- * @param (Number) total
- * @param (String) message
- * @throws (Error) Throws error, when total parts not equal previous length
+ * @param {Number} index
+ * @param {Number} total
+ * @param {String} message
+ * @throws {Error} Throws error, when total parts not equal previous length
  */
 jsamf.CallInstance.prototype.addPart = function (index, total, message)
 {
@@ -303,12 +353,20 @@ jsamf.CallInstance.prototype.finalize = function()
 
 
 /**
- * @param (String) level
- * @param (String) code 
+ * @constructor
+ * @param {String} level
+ * @param {String} code
+ * @retutn {jsamf.NetStatusObject} 
  */
 jsamf.NetStatusObject = function (level, code)
 {
+	/**
+	 * @type {String}
+	 */
 	this.level = level;
+	/**
+	 * @type {String}
+	 */
 	this.code = code;
 }
 
@@ -337,8 +395,8 @@ jsamf.StatusCode =
 
 /**
  * Moze powinienem to zostawic jako zwykle parametry osadzania?
- * @param (String) divName 
- * @param (String) initCallbackName 
+ * @param {String} divName 
+ * @param {String} initCallbackName 
  */
 /*jsamf.InitObject = function (divName, initCallbackName)
 {
